@@ -1,6 +1,6 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { FcGoogle } from "react-icons/fc"
-
+import {TriangleAlert} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -18,9 +18,23 @@ export const SignInCard = ({setState}: SignInCardProps) => {
 
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [error, setError] = useState("")
     const [pending, setPending] = useState(false)
 
+  
+
     const {signIn} = useAuthActions()
+   
+    const onPasswordSignIn = (e: React.FormEvent<HTMLElement> ) => {
+        e.preventDefault()
+        setPending(true)
+        signIn("password", {email, password, flow: "signIn"})
+            .catch(() => {
+               setError("Invalid email or password")
+            }).finally(() => {
+                setPending(false)
+            })
+     }
 
     const onProviderSignIn = (value: "github" | "google") => {
         setPending(true)
@@ -36,8 +50,14 @@ export const SignInCard = ({setState}: SignInCardProps) => {
                 </CardTitle>
                 <CardDescription>Use your email or another service to continue</CardDescription>
                 </CardHeader>
+                {!!error && (
+                    <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6">
+                        <TriangleAlert className="size-4"/>
+                        <p>{error}</p>
+                    </div>
+                )}
             <CardContent className="space-y-5 px-0 pb-0">
-                <form className="space-y-2.5">
+                <form onSubmit={onPasswordSignIn} className="space-y-2.5">
                    <Input
                     disabled={pending}
                     value={email}
@@ -80,7 +100,7 @@ export const SignInCard = ({setState}: SignInCardProps) => {
                         Continue with Github</Button>
                 </div>
                 <p className="text-xs text-muted-foreground">Don't have an account? <span className="text-sky-700 hover:underline cursor-pointer" onClick={() => setState("signUp")}>Sign Up</span>
-                     </p> 
+                </p> 
 
             </CardContent>
         </Card>
