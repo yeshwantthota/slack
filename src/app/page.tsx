@@ -1,25 +1,28 @@
 "use client";
-import { useAuthActions } from "@convex-dev/auth/react";
 import { UserButton } from "@/features/auth/components/user-button";
-import { useEffect, useState } from "react";
+
+import { useGetWorkspaces } from "@/features/workspaces/api/use-get-workspaces";
+import { useCreateWorkspaceModal } from "@/features/workspaces/store/use-create-workspace-modal";
+import { useEffect, useMemo } from "react";
 export default function Home() {
-  const { signOut } = useAuthActions();
-  const [mounted, setMounted] = useState(false);
+  
+  const [open ,setOpen] = useCreateWorkspaceModal()
+
+  const {data, isLoading} = useGetWorkspaces()
+
+  const workSpaceId = useMemo(() => data?.[0]?._id, [data]);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
 
-  const handleLogout = async () => {
-    await signOut();
-    if (mounted) {
-      window.location.reload()
+    if(isLoading) return;
+    if(workSpaceId){
+      console.log("Redirect to workspace")
+    }else if(!open){
+      setOpen(true)
+      console.log("Open Creation Modal")
     }
-  };
+  }, [workSpaceId, isLoading, open, setOpen]);
 
-  if (!mounted) { 
-    return null;
-  }
   return (
     
     <div>
